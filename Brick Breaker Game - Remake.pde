@@ -1,4 +1,7 @@
 // ball's position and movement
+
+import java.util.Arrays;
+
 float x, y;
 int xDir, yDir, diam;
 color ballColor;
@@ -17,6 +20,10 @@ int [][] bricks = new int[bRowNo][bColNo]; // 2 dimensional array
 // score
 int score;
 boolean flag = true;
+boolean gameOver = false;
+int hitScore;
+
+
 
 void setup(){
   noCursor();
@@ -46,6 +53,7 @@ void setup(){
 
   // score
   score = 0;
+  hitScore = 3;
 
   // brick initialization at the top
   for(i=0; i<bRowNo; i++){
@@ -105,7 +113,28 @@ void draw(){
       }
     }
   }
- 
+  
+  
+  if(hitScore >= 3){
+    drawHeart(30, height/2 - 20);
+    drawHeart(30, height/2 + 30);
+    drawHeart(30, height/2 + 80);
+    }else if (hitScore == 2){
+      score = 0;
+      drawHeart(30, height/2 + 30);
+      drawHeart(30, height/2 + 80);
+    } else if (hitScore == 1){
+      score = 0;
+      drawHeart(30, height/2 + 80);
+    } else if (hitScore <= 0){
+      gameOver();
+    }
+    
+   if(hitScore <= 0 && score <= 0){
+     gameOver();
+   }
+   
+   
   // ball drawing and movement
   noStroke();
   fill(ballColor);
@@ -115,6 +144,9 @@ void draw(){
   
   // drawing a pad at new positon
   fill(padColor);
+  if(gameOver == true){
+    fill(#eeeeee);
+  }
   padX += ((float)(mouseX-padWidth/2) - padX) * easyInOut;
   padY = constrain(padY, 100, 1640);
   rect(padX, padY + mouseEvent*10, padWidth, 20, 10);  
@@ -126,8 +158,7 @@ void draw(){
   if ( y > height-diam/2 ) { // down side check
     yDir *= -1;
     score -= 4;
-    rect(0,0, 1680, 900, 20);
-    fill(255, 0, 0, 10);
+    hitScore--;
   }
   
   // if the ball in in the region of bricks
@@ -139,6 +170,11 @@ void draw(){
         score += 2;
         if(score > 9) padWidth = 300;
         else if(score > 19 ) padWidth = 200;
+        
+        if(score > 14){
+          xDir = 6;
+          yDir = 8;
+        }
     }
     else if ( y < 0) yDir *= -1;     // bounce at the top
   }
@@ -154,4 +190,70 @@ void draw(){
 void mouseWheel(MouseEvent event) {
   mouseEvent += event.getCount();  
   println(mouseEvent);
+}
+
+
+void drawHeart(int x, int y){
+    fill(#dddddd);
+    smooth();
+    rect(x, y, 30, 30, 10);
+}
+
+void gameOver(){
+   int i, j;  
+  
+   cursor();
+   gameOver = true;
+    
+   for(i=0; i<bRowNo; i++){
+    for(j=0; j<bColNo; j++){
+        bricks[i][j] =0;
+    }
+  }
+    //Arrays.fill(bricks, 0);
+    x = y = 0;
+    ballColor = #eeeeee;
+  
+    fill(#eeeeee);
+    noStroke();
+    rect(0, 0, width, height, 30);
+    print("game over!");  
+  
+    PFont scoreText;
+    scoreText = createFont("Staatliches", 280, true);
+    fill(#dddddd);
+    textFont(scoreText, 280);
+    text("GAME OVER!", (width/2) - 500, (height/2) + 100);
+    
+    
+    fill(#dddddd);
+    rect(350, 600, 150, 50, 10);
+    
+    PFont restartFont;
+    restartFont = createFont("Staatliches", 40, true);
+    textFont(restartFont, 40);
+    fill(#eeeeee);
+    text("RETRY", 380, 638);
+    
+    
+}
+
+void reStart(){
+  brickInitialization();
+  x = width / 2;
+  y = height / 2;
+  xDir = 4;
+  yDir = 6;
+  
+  score = 0;
+  hitScore = 3;
+}
+
+void brickInitialization(){
+  int i, j;
+  for(i=0; i<bRowNo; i++){
+    for(j=0; j<bColNo; j++){
+        bricks[i][j] = int(random(3)) + 1;
+    }
+  }
 }
